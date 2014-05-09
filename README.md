@@ -1,6 +1,6 @@
 # pillar-mode
 
-[![Build Status](https://travis-ci.org/DamienCassou/pillar-mode.png?branch=master)](https://travis-ci.org/DamienCassou/pillar-mode)
+[![Build Status](https://travis-ci.org/pillar-markup/pillar-mode.svg?branch=master)](https://travis-ci.org/pillar-markup/pillar-mode)
 
 ## Summary
 
