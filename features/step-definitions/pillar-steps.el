@@ -66,7 +66,7 @@ The value of the face PROPERTY must be one of VALID-VALUES."
    :underline
    '(t)))
 
-(Then "current point should be in underline"
+(Then "^current point should be in underline$"
   (lambda ()
     (cl-assert
      (pillar-steps::character-underline-p)
@@ -89,7 +89,7 @@ The value of the face PROPERTY must be one of VALID-VALUES."
      (null (pillar-steps::faces-at-point)))
     nil))
 
-(And "^I delete other windows$"
+(Given "^I delete other windows$"
   (lambda ()
     (delete-other-windows)))
 
