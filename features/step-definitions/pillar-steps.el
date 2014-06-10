@@ -93,6 +93,25 @@ The value of the face PROPERTY must be one of VALID-VALUES."
   (lambda ()
     (delete-other-windows)))
 
+(Given "^I convert the buffer to latex$"
+  (lambda ()
+    (p2l-convert-buffer)))
+
+(Given "^I load latex2pillar$"
+  (lambda ()
+    (require 'latex2pillar)))
+
+(Then "^buffer should be empty$"
+  (lambda ()
+    (let ((message "Buffer was supposed to be empty but contains %s characters")))
+    (cl-assert
+     (= (point-min) (point-max)) nil message (- (point-max) (point-min)))
+    nil))
+
+(Given "^I insert a new line$"
+  (lambda ()
+    (newline 1)))
+
 ;; Local Variables:
 ;; eval: (flycheck-mode -1)
 ;; End:
