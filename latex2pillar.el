@@ -260,6 +260,9 @@
   (p2l--interpret-command0-conversion-table)
   (p2l--interpret-command1-conversion-table)
   (p2l--interpret-command2-conversion-table)
-  (p2l-convert-itemize-list))
+  (p2l-convert-itemize-list)
+  (p2l-convert-figure)
+  (p2l-convert-code)
+  (p2l-convert-double-quotes))
 
 (provide 'latex2pillar)
