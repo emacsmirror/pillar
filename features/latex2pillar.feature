@@ -166,4 +166,20 @@ Feature: LaTeX to Pillar
     And I convert the buffer to latex
     Then I should see "==FileStream>>binary=="
 
+  Scenario: Converting a figure
+    When I clear the buffer
+    And I insert "\begin{figure}[ht]"
+    And I insert a new line
+    And I insert "\centerline{\includegraphics[scale=0.5]{abcdeStef}}"
+    And I insert a new line
+    And I insert "\caption{A stream positioned at its beginning.}"
+    And I insert a new line
+    And I insert "\figlabel{abcde}"
+    And I insert a new line
+    And I insert "\vspace{.2in}"
+    And I insert a new line
+    And I insert "\end{figure}"
+    And I insert a new line
 
+    Given I convert the buffer to latex
+    Then I should see "+A stream positioned at its beginning.>file://figures/abcdeStef.png|label=fig:abcde+"
