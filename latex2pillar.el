@@ -100,7 +100,9 @@
   (while (p2l--convert-command2-once latex pillar-begin pillar-middle pillar-end newline)))
 
 (defconst p2l--command0-conversion-table
-  '(("ie" "''i.e.'',")))
+  '(("ie" "''i.e.'',")
+    ("eg" "''e.g.'',")
+    ("etc" "etc.")))
 
 (defconst p2l--command1-conversion-table
   '(("chapter" "!" "\n" t)
@@ -113,6 +115,7 @@
     ("clsind" "==" "==")
     ("figref" "*fig:" "*")
     ("ct" "==" "==")
+    ("lct" "==" "==")
     ("emph" "''" "''")))
 
 (defconst p2l--command2-conversion-table
