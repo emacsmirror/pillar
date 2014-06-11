@@ -183,3 +183,18 @@ Feature: LaTeX to Pillar
 
     Given I convert the buffer to latex
     Then I should see "+A stream positioned at its beginning.>file://figures/abcdeStef.png|label=fig:abcde+"
+
+  Scenario: Converting a code block
+    When I clear the buffer
+    And I insert "\begin{code}{@TEST |r|}"
+    And I insert a new line
+    And I insert "some code here"
+    And I insert a new line
+    And I insert "\end{code}"
+    And I insert a new line
+
+    Given I convert the buffer to latex
+    Then I should see "[[["
+    And I should see "some code here"
+    And I should see "]]]"
+    And I should not see "\begin"

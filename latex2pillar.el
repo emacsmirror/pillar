@@ -218,6 +218,28 @@
 (defun p2l-convert-figure ()
   (p2l--setup-buffer)
   (while (p2l-convert-figure-once)))
+
+(defun p2l-convert-code-once ()
+  (let (before-begin after-end file caption label)
+    (when (re-search-forward "^ *\\\\begin{code}" nil t)
+      (setq before-begin (match-beginning 0))
+      (re-search-forward (concat "^ *\\\\end{code}"))
+      (setq after-end (match-end 0))
+      (save-excursion
+        (save-restriction
+          (narrow-to-region before-begin after-end)
+          (goto-char (point-min))
+          (kill-line)
+          (insert "[[[")
+          (goto-char (point-max))
+          (beginning-of-line)
+          (kill-line)
+          (insert "]]]")
+          t)))))
+
+(defun p2l-convert-code ()
+  (p2l--setup-buffer)
+  (while (p2l-convert-code-once)))
 (defun p2l-convert-buffer ()
   (interactive)
   (p2l--setup-buffer)  
