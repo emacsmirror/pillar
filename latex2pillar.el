@@ -137,11 +137,11 @@
   (just-one-space 0))
 
 (defun p2l-convert-itemize-list-once ()
-  (let (before-begin after-end matched-env description-p item-begin)
-    (when (re-search-forward "^\\\\begin{\\(itemize\\|enumerate\\|description\\)}" nil t)
+  (let (before-begin after-end matched-env description-p)
+    (when (re-search-forward "^ *\\\\begin{\\(itemize\\|enumerate\\|description\\)}" nil t)
       (setq before-begin (match-beginning 0))
       (setq matched-env (match-string 1))
-      (re-search-forward (concat "^\\\\end{" matched-env "}"))
+      (re-search-forward (concat "^ *\\\\end{" matched-env "}"))
       (setq after-end (match-end 0))
       (setq description-p (string= matched-env "description"))
       (save-excursion
@@ -176,6 +176,7 @@
       t)))
 
 (defun p2l-convert-itemize-list ()
+  (p2l--setup-buffer)
   (while (p2l-convert-itemize-list-once)))
 
 (defun p2l-convert-buffer ()
