@@ -62,6 +62,20 @@ Feature: LaTeX to Pillar
     When I place the cursor before "-Bar"
     Then The cursor should be at point "6"
 
+  Scenario: Converting lists with item across lines
+    When I clear the buffer
+    When I insert "\begin{itemize}"
+    And I insert a new line
+    And I insert "    \item line1"
+    And I insert a new line
+    And I insert "line2"
+    And I insert a new line
+    And I insert "\end{itemize}"
+    And I insert a new line
+
+    Given I convert the buffer to latex
+    Then I should see "-line1 line2"
+
   Scenario: Converting lists with multiple \item per line
     When I clear the buffer
     When I insert "\begin{itemize}"
