@@ -198,3 +198,10 @@ Feature: LaTeX to Pillar
     And I should see "some code here"
     And I should see "]]]"
     And I should not see "\begin"
+
+  Scenario: Converting double-quotes
+    When I clear the buffer
+    And I insert "``foo'' ``bar''"
+
+    Given I convert the buffer to latex
+    Then I should see "''foo'' ''bar''"

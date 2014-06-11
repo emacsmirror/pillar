@@ -240,6 +240,16 @@
 (defun p2l-convert-code ()
   (p2l--setup-buffer)
   (while (p2l-convert-code-once)))
+
+(defun p2l-convert-double-quotes-once ()
+  (when (re-search-forward "``\\(.*?\\)''" nil t)
+    (replace-match "''\\1''")
+    t))
+
+(defun p2l-convert-double-quotes ()
+  (p2l--setup-buffer)
+  (while (p2l-convert-double-quotes-once)))
+
 (defun p2l-convert-buffer ()
   (interactive)
   (p2l--setup-buffer)  
