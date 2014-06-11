@@ -44,6 +44,74 @@ Feature: LaTeX to Pillar
     And I should see "-Bar"
     And I should not see "itemize"
 
+  Scenario: Converting lists with whitespace
+    When I clear the buffer
+    When I insert "\begin{itemize}"
+    And I insert a new line
+    And I insert "    \item Foo"
+    And I insert a new line
+    And I insert "  \item Bar"
+    And I insert a new line
+    And I insert "\end{itemize}"
+    And I insert a new line
+
+    Given I convert the buffer to latex
+    Then I should see "-Foo"
+    When I place the cursor before "-Foo"
+    Then The cursor should be at point "1"
+    When I place the cursor before "-Bar"
+    Then The cursor should be at point "6"
+
+  Scenario: Converting lists with multiple \item per line
+    When I clear the buffer
+    When I insert "\begin{itemize}"
+    And I insert a new line
+    And I insert "    \item Foo\item Bar"
+    And I insert a new line
+    And I insert "\end{itemize}"
+    And I insert a new line
+
+    Given I convert the buffer to latex
+    Then I should see "-Foo"
+    When I place the cursor before "-Foo"
+    Then The cursor should be at point "1"
+    When I place the cursor before "-Bar"
+    Then The cursor should be at point "6"
+
+  Scenario: Converting enumerate lists
+    When I clear the buffer
+    When I insert "\begin{enumerate}"
+    And I insert a new line
+    And I insert "\item Foo"
+    And I insert a new line
+    And I insert "\item Bar"
+    And I insert a new line
+    And I insert "\end{enumerate}"
+    And I insert a new line
+
+    Given I convert the buffer to latex
+    Then I should see "-Foo"
+    And I should see "-Bar"
+    And I should not see "enumerate"
+
+  Scenario: Converting description lists
+    When I clear the buffer
+    When I insert "\begin{description}"
+    And I insert a new line
+    And I insert "\item[   Foo1]Foo2"
+    And I insert a new line
+    And I insert "\item[Bar1   ]  Bar2"
+    And I insert a new line
+    And I insert "\end{description}"
+    And I insert a new line
+
+    Given I convert the buffer to latex
+    Then I should see ";Foo1"
+    And I should see ":Foo2"
+    And I should see ";Bar1"
+    And I should see ":Bar2"
+    And I should not see "description"
+
   Scenario: Sectioning commands are replaced
     When I clear the buffer
     When I insert "\chapter{Title}"
