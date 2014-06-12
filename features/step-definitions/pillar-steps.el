@@ -99,7 +99,7 @@ The value of the face PROPERTY must be one of VALID-VALUES."
 
 (Given "^I load latex2pillar$"
   (lambda ()
-    (require 'latex2pillar)))
+    (require 'pillar-latex2pillar)))
 
 (Then "^buffer should be empty$"
   (lambda ()

@@ -1,7 +1,30 @@
-;;; latex2pillar.el --- Help converting LaTeX files to Pillar
+;;; pillar-latex2pillar.el --- Help converting LaTeX files to Pillar   -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2014 Damien Cassou
+
+;; Author: Damien Cassou <damien.cassou@gmail.com>
+;; Version: 0.1
+;; Keywords: markup major-mode latex
+;; URL: http://github.com/DamienCassou/pillar-mode
+;;
+;; This file is not part of GNU Emacs.
+
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; 
+
+;; Utility functions to convert LaTeX files to Pillar ones
 
 ;;; Code:
 
@@ -328,6 +351,8 @@ Does *not* delete newline characters."
   (p2l-convert-code)
   (p2l-convert-double-quotes))
 
-(provide 'latex2pillar)
+(provide 'pillar-latex2pillar)
 
-;;; latex2pillar.el ends here
+;;; pillar-latex2pillar.el ends here
+
+;;  LocalWords:  arg eg
