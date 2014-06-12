@@ -28,6 +28,10 @@ Feature: LaTeX to Pillar
     And I convert the buffer to latex
     Then buffer should be empty
 
+    When I insert "\cmindex{Stream}{readOnlyFileNamed:}"
+    And I convert the buffer to latex
+    Then buffer should be empty
+
   Scenario: Converting itemize lists
     When I clear the buffer
     When I insert "\begin{itemize}"
