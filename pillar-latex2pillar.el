@@ -88,7 +88,6 @@
 LATEX is the name of a 0-argument macro (e.g., \eg).  PILLAR is
 the Pillar markup to replace the macro with.  NEWLINE, if t, will
 make sure the replacement text will start on a newline."
-LATEX is the name of a 0-argument command (e.g., \eg).  PILLAR is
   (when (re-search-forward
          (concat "\\\\" latex) nil t)
     (let ((start (match-beginning 0))
