@@ -105,8 +105,7 @@ The value of the face PROPERTY must be one of VALID-VALUES."
   (lambda ()
     (let ((message "Buffer supposed to be empty but contains %s chars"))
       (cl-assert
-       (= (point-min) (point-max)) nil message (- (point-max) (point-min))))
-    nil))
+       (= (point-min) (point-max)) nil "foo" (- (point-max) (point-min))))))
 
 (Given "^I insert a new line$"
   (lambda ()
