@@ -1,3 +1,10 @@
+;;; latex2pillar.el --- Help converting LaTeX files to Pillar
+
+;;; Commentary:
+;; 
+
+;;; Code:
+
 (defconst p2l-editor-macros
   '("apl" "ab" "sd" "dc" "md" "on" "damien" "lr" "orla" "alex" "alx" "dr" "ja" "jr" "jb" "fp" "michael" "ew" "mb" "hw" "ben" "hjo" "ml"))
 
@@ -5,21 +12,24 @@
   '("clsindexmain" "needlines"))
 
 (defun p2l--setup-buffer ()
+  "Prepare the buffer for conversion."
   (goto-char (point-min))
   (fundamental-mode)
   (font-lock-mode -1))
 
 (defun p2l-remove-latex-comments ()
+  "Remove all lines that start with %."
   (interactive)
   (p2l--setup-buffer)
   (delete-matching-lines "^%.*$"))
 
 (defun p2l-remove-useless-macros ()
+  "Delete some LaTeX macro that do not affect output."
   (interactive)
   (p2l--setup-buffer)
   (while (re-search-forward
           (concat "\\\\"
-                  (regexp-opt 
+                  (regexp-opt
                    (append p2l-editor-macros
                            p2l-misc-macros-to-remove))
                   "{")
@@ -33,6 +43,7 @@
       (delete-region start (point)))))
 
 (defun p2l-remove-header ()
+  "Remove everything before \chapter{...}."
   (interactive)
   (p2l--setup-buffer)
   (let ((start (point)))
@@ -41,6 +52,7 @@
       (delete-region start (point)))))
 
 (defun p2l-remove-footer ()
+  "Remove the useless end of the file."
   (interactive)
   (goto-char (point-max))
   (let ((end (point)))
@@ -49,6 +61,10 @@
      (delete-region (point) end))))
 
 (defun p2l--convert-command0-once (latex pillar &optional newline)
+  "Transform the next LATEX 0-arg command to PILLAR.
+LATEX is the name of a 0-argument macro (e.g., \eg).  PILLAR is
+the Pillar markup to replace the macro with.  NEWLINE, if t, will
+make sure the replacement text will start on a newline."
   (when (re-search-forward
          (concat "\\\\" latex) nil t)
     (let ((start (match-beginning 0))
@@ -65,15 +81,25 @@
       t)))
 
 (defun p2l--convert-command0 (latex pillar &optional newline)
+  "Transform all LATEX 0-arg commands to PILLAR.
+LATEX is the name of a 0-argument macro (e.g., \eg).  PILLAR is
+the Pillar markup to replace the macro with.  NEWLINE, if t, will
+make sure the replacement text will start on a newline."
   (p2l--setup-buffer)
   (while (p2l--convert-command0-once latex pillar newline)))
 
 (defun p2l--convert-command1-once (latex pillar-begin &optional pillar-end newline)
+  "Transform the next LATEX 1-arg command.
+LATEX is the name of a 0-argument macro (e.g., \eg).
+PILLAR-BEGIN is the Pillar markup to replace the macro name with.
+PILLAR-END, if provided, is the Pillar markup that will be
+written after the macro's first argument.  NEWLINE, if t, will
+make sure the replacement text will start on a newline."
   (when (p2l--convert-command0-once latex pillar-begin newline)
     (let ((start (point))
           end)
       (forward-sexp)
-      (delete-backward-char 1)
+      (delete-char -1)
       (insert pillar-end)
       (setq end (point))
       (goto-char start)
@@ -82,20 +108,42 @@
       t)))
 
 (defun p2l--convert-command1 (latex pillar-begin &optional pillar-end newline)
+  "Transform all LATEX 1-arg commands.
+LATEX is the name of a 0-argument macro (e.g., \eg).
+PILLAR-BEGIN is the Pillar markup to replace the macro name with.
+PILLAR-END, if provided, is the Pillar markup that will be
+written after the macro's first argument.  NEWLINE, if t, will
+make sure the replacement text will start on a newline."
   (p2l--setup-buffer)
   (while (p2l--convert-command1-once latex pillar-begin pillar-end newline)))
 
 (defun p2l--convert-command2-once (latex pillar-begin pillar-middle &optional pillar-end newline)
+  "Transform the next LATEX 2-arg command.
+LATEX is the name of a 0-argument macro (e.g., \eg).
+PILLAR-BEGIN is the Pillar markup to replace the macro name with.
+PILLAR-MIDDLE, is the Pillar markup that will be written between
+the macro's first and second arguments.  PILLAR-END, if provided,
+is the Pillar markup that will be written after the macro's second
+argument.  NEWLINE, if t, will make sure the replacement text
+will start on a newline."
   (when (p2l--convert-command1-once latex pillar-begin pillar-middle newline)
     (let ((start (point)))
       (forward-sexp)
-      (delete-backward-char 1)
+      (delete-char -1)
       (insert pillar-end)
       (goto-char start)
       (delete-forward-char 1)
       t)))
 
 (defun p2l--convert-command2 (latex pillar-begin pillar-middle &optional pillar-end newline)
+  "Transform all LATEX 2-arg commands.
+LATEX is the name of a 0-argument macro (e.g., \eg).
+PILLAR-BEGIN is the Pillar markup to replace the macro name with.
+PILLAR-MIDDLE, is the Pillar markup that will be written between
+the macro's first and second arguments.  PILLAR-END, if provided,
+is the Pillar markup that will be written after the macro's second
+argument.  NEWLINE, if t, will make sure the replacement text
+will start on a newline."
   (p2l--setup-buffer)
   (while (p2l--convert-command2-once latex pillar-begin pillar-middle pillar-end newline)))
 
@@ -122,21 +170,27 @@
   '(("mthind" "==" ">>" "==")))
 
 (defun p2l--interpret-command0-conversion-table ()
+  "Convert all LaTeX 0-arg commands."
   (dolist (conversion p2l--command0-conversion-table)
     (apply #'p2l--convert-command0 conversion)))
 
 (defun p2l--interpret-command1-conversion-table ()
+  "Convert all LaTeX 1-arg commands."
   (dolist (conversion p2l--command1-conversion-table)
     (apply #'p2l--convert-command1 conversion)))
 
 (defun p2l--interpret-command2-conversion-table ()
+  "Convert all LaTeX 2-arg commands."
   (dolist (conversion p2l--command2-conversion-table)
     (apply #'p2l--convert-command2 conversion)))
 
 (defun p2l--delete-all-spaces ()
+  "Remove all spaces around point.
+Does *not* delete newline characters."
   (just-one-space 0))
 
-(defun p2l-convert-itemize-list-once ()
+(defun p2l-convert-list-once ()
+  "Convert the next list (e.g, itemize or description)."
   (let (before-begin after-end matched-env description-p)
     (when (re-search-forward "^ *\\\\begin{\\(itemize\\|enumerate\\|description\\)}" nil t)
       (setq before-begin (match-beginning 0))
@@ -173,7 +227,7 @@
               (delete-forward-char 1) ;; [
               (p2l--delete-all-spaces)
               (re-search-forward "]")
-              (delete-backward-char 1) ;; ]
+              (delete-char -1) ;; ]
               (p2l--delete-all-spaces)
               (newline 1)
               (insert ":")))
@@ -181,11 +235,13 @@
           (delete-blank-lines)))
       t)))
 
-(defun p2l-convert-itemize-list ()
+(defun p2l-convert-list ()
+  "Convert all lists (e.g, itemize or description)."
   (p2l--setup-buffer)
-  (while (p2l-convert-itemize-list-once)))
+  (while (p2l-convert-list-once)))
 
 (defun p2l-convert-figure-once ()
+  "Convert the next figure."
   (let (before-begin after-end file caption label)
     (when (re-search-forward "^ *\\\\begin{figure}" nil t)
       (setq before-begin (match-beginning 0))
@@ -202,7 +258,7 @@
           (kill-line)
           (delete-blank-lines)
           (goto-char (point-min))
-          (when 
+          (when
               (re-search-forward "\\\\includegraphics\\[[^]]*\\]{\\([^}]*\\)}" nil t)
             (setq file (match-string 1))
             (goto-char (point-min))
@@ -216,10 +272,12 @@
                 t))))))))
 
 (defun p2l-convert-figure ()
+  "Convert all figures."
   (p2l--setup-buffer)
   (while (p2l-convert-figure-once)))
 
 (defun p2l-convert-code-once ()
+  "Convert the next code block."
   (let (before-begin after-end file caption label)
     (when (re-search-forward "^ *\\\\begin{code}" nil t)
       (setq before-begin (match-beginning 0))
@@ -238,21 +296,25 @@
           t)))))
 
 (defun p2l-convert-code ()
+  "Convert all code blocks."
   (p2l--setup-buffer)
   (while (p2l-convert-code-once)))
 
 (defun p2l-convert-double-quotes-once ()
+  "Convert the next ``such LaTeX'' to use Pillar emphasis."
   (when (re-search-forward "``\\(.*?\\)''" nil t)
     (replace-match "''\\1''")
     t))
 
 (defun p2l-convert-double-quotes ()
+  "Convert all ``such LaTeX'' to use Pillar emphasis."
   (p2l--setup-buffer)
   (while (p2l-convert-double-quotes-once)))
 
 (defun p2l-convert-buffer ()
+  "Apply all LaTeX to Pillar conversions to the buffer."
   (interactive)
-  (p2l--setup-buffer)  
+  (p2l--setup-buffer)
   (p2l-remove-latex-comments)
   (p2l-remove-useless-macros)
   (p2l-remove-header)
@@ -260,9 +322,11 @@
   (p2l--interpret-command0-conversion-table)
   (p2l--interpret-command1-conversion-table)
   (p2l--interpret-command2-conversion-table)
-  (p2l-convert-itemize-list)
+  (p2l-convert-list)
   (p2l-convert-figure)
   (p2l-convert-code)
   (p2l-convert-double-quotes))
 
 (provide 'latex2pillar)
+
+;;; latex2pillar.el ends here
