@@ -5,10 +5,10 @@
 
 ;;; Code:
 
-(defconst p2l-editor-macros
+(defconst p2l-editor-commands
   '("apl" "ab" "sd" "dc" "md" "on" "damien" "lr" "orla" "alex" "alx" "dr" "ja" "jr" "jb" "fp" "michael" "ew" "mb" "hw" "ben" "hjo" "ml"))
 
-(defconst p2l-misc-macros-to-remove
+(defconst p2l-misc-commands-to-remove
   '("clsindexmain" "needlines"))
 
 (defun p2l--setup-buffer ()
@@ -23,15 +23,15 @@
   (p2l--setup-buffer)
   (delete-matching-lines "^%.*$"))
 
-(defun p2l-remove-useless-macros ()
-  "Delete some LaTeX macro that do not affect output."
+(defun p2l-remove-useless-commands ()
+  "Delete some LaTeX command that do not affect output."
   (interactive)
   (p2l--setup-buffer)
   (while (re-search-forward
           (concat "\\\\"
                   (regexp-opt
-                   (append p2l-editor-macros
-                           p2l-misc-macros-to-remove))
+                   (append p2l-editor-commands
+                           p2l-misc-commands-to-remove))
                   "{")
           nil t)
     (backward-char)
@@ -65,6 +65,7 @@
 LATEX is the name of a 0-argument macro (e.g., \eg).  PILLAR is
 the Pillar markup to replace the macro with.  NEWLINE, if t, will
 make sure the replacement text will start on a newline."
+LATEX is the name of a 0-argument command (e.g., \eg).  PILLAR is
   (when (re-search-forward
          (concat "\\\\" latex) nil t)
     (let ((start (match-beginning 0))
@@ -82,18 +83,18 @@ make sure the replacement text will start on a newline."
 
 (defun p2l--convert-command0 (latex pillar &optional newline)
   "Transform all LATEX 0-arg commands to PILLAR.
-LATEX is the name of a 0-argument macro (e.g., \eg).  PILLAR is
-the Pillar markup to replace the macro with.  NEWLINE, if t, will
+LATEX is the name of a 0-argument command (e.g., \eg).  PILLAR is
+the Pillar markup to replace the command with.  NEWLINE, if t, will
 make sure the replacement text will start on a newline."
   (p2l--setup-buffer)
   (while (p2l--convert-command0-once latex pillar newline)))
 
 (defun p2l--convert-command1-once (latex pillar-begin &optional pillar-end newline)
   "Transform the next LATEX 1-arg command.
-LATEX is the name of a 0-argument macro (e.g., \eg).
-PILLAR-BEGIN is the Pillar markup to replace the macro name with.
+LATEX is the name of a 0-argument command (e.g., \eg).
+PILLAR-BEGIN is the Pillar markup to replace the command name with.
 PILLAR-END, if provided, is the Pillar markup that will be
-written after the macro's first argument.  NEWLINE, if t, will
+written after the command's first argument.  NEWLINE, if t, will
 make sure the replacement text will start on a newline."
   (when (p2l--convert-command0-once latex pillar-begin newline)
     (let ((start (point))
@@ -109,21 +110,21 @@ make sure the replacement text will start on a newline."
 
 (defun p2l--convert-command1 (latex pillar-begin &optional pillar-end newline)
   "Transform all LATEX 1-arg commands.
-LATEX is the name of a 0-argument macro (e.g., \eg).
-PILLAR-BEGIN is the Pillar markup to replace the macro name with.
+LATEX is the name of a 0-argument command (e.g., \eg).
+PILLAR-BEGIN is the Pillar markup to replace the command name with.
 PILLAR-END, if provided, is the Pillar markup that will be
-written after the macro's first argument.  NEWLINE, if t, will
+written after the command's first argument.  NEWLINE, if t, will
 make sure the replacement text will start on a newline."
   (p2l--setup-buffer)
   (while (p2l--convert-command1-once latex pillar-begin pillar-end newline)))
 
 (defun p2l--convert-command2-once (latex pillar-begin pillar-middle &optional pillar-end newline)
   "Transform the next LATEX 2-arg command.
-LATEX is the name of a 0-argument macro (e.g., \eg).
-PILLAR-BEGIN is the Pillar markup to replace the macro name with.
+LATEX is the name of a 0-argument command (e.g., \eg).
+PILLAR-BEGIN is the Pillar markup to replace the command name with.
 PILLAR-MIDDLE, is the Pillar markup that will be written between
-the macro's first and second arguments.  PILLAR-END, if provided,
-is the Pillar markup that will be written after the macro's second
+the command's first and second arguments.  PILLAR-END, if provided,
+is the Pillar markup that will be written after the command's second
 argument.  NEWLINE, if t, will make sure the replacement text
 will start on a newline."
   (when (p2l--convert-command1-once latex pillar-begin pillar-middle newline)
@@ -137,11 +138,11 @@ will start on a newline."
 
 (defun p2l--convert-command2 (latex pillar-begin pillar-middle &optional pillar-end newline)
   "Transform all LATEX 2-arg commands.
-LATEX is the name of a 0-argument macro (e.g., \eg).
-PILLAR-BEGIN is the Pillar markup to replace the macro name with.
+LATEX is the name of a 0-argument command (e.g., \eg).
+PILLAR-BEGIN is the Pillar markup to replace the command name with.
 PILLAR-MIDDLE, is the Pillar markup that will be written between
-the macro's first and second arguments.  PILLAR-END, if provided,
-is the Pillar markup that will be written after the macro's second
+the command's first and second arguments.  PILLAR-END, if provided,
+is the Pillar markup that will be written after the command's second
 argument.  NEWLINE, if t, will make sure the replacement text
 will start on a newline."
   (p2l--setup-buffer)
@@ -316,7 +317,7 @@ Does *not* delete newline characters."
   (interactive)
   (p2l--setup-buffer)
   (p2l-remove-latex-comments)
-  (p2l-remove-useless-macros)
+  (p2l-remove-useless-commands)
   (p2l-remove-header)
   (p2l-remove-footer)
   (p2l--interpret-command0-conversion-table)
