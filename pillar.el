@@ -218,7 +218,6 @@ This helps improve font locking for block constructs such as pre blocks."
 ;; TODO: use a print to the standard output and use a stream later on.
 (defun pillar-compile-file (input-file output-file format)
   "Compile INPUT-FILE to OUTPUT-FILE in FORMAT.
-
 Supported formats are `latex', `html' and `markdown'."
   (shell-command (concat pillar-executable-path
                          " export --to="
@@ -230,7 +229,6 @@ Supported formats are `latex', `html' and `markdown'."
 
 (defmacro pillar-defoutput (format extension)
   "Define an output FORMAT for Pillar, which use the file extension EXTENSION.
-
 This macro defines an interactive function `pillar-compile-to-FORMAT'."
   (unless (symbolp format)
     (error "FORMAT must the a symbol"))
