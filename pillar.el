@@ -45,6 +45,11 @@
   :group 'pillar
   :group 'faces)
 
+(defcustom pillar-executable-path "pillar"
+  "Path to the executable pillar path."
+  :group 'pillar
+  :type 'string)
+
 (defvar pillar-font-lock-keywords nil
   "Syntax highlighting for Pillar files.")
 
@@ -171,7 +176,6 @@ This helps improve font locking for block constructs such as pre blocks."
      (description "Formats")
      (actions ("All" ,@pillar-key-mode-special-font-actions)))))
 
-
 ;;;###autoload
 (define-derived-mode pillar-mode text-mode "Pillar"
   "Major mode for editing Pillar CMS files."
@@ -199,6 +203,64 @@ This helps improve font locking for block constructs such as pre blocks."
   (add-hook 'font-lock-extend-region-functions
             'pillar-font-lock-extend-region))
 
+
+;;; File compilation
+
+(defun pillar-compile (format extension)
+  "Compile the current buffer file using FORMAT and save it in a file with the extension EXTENSION."
+  (let* ((current-file (buffer-name (current-buffer)))
+         (pillar-file (expand-file-name current-file))
+         (output-file (concat (expand-file-name (file-name-base current-file))
+                              "."
+                              (symbol-name extension))))
+    (pillar-compile-file current-file output-file format)))
+
+;; TODO: use a print to the standard output and use a stream later on.
+(defun pillar-compile-file (input-file output-file format)
+  "Compile INPUT-FILE to OUTPUT-FILE in FORMAT.
+
+Supported formats are `latex', `html' and `markdown'."
+  (shell-command (concat pillar-executable-path
+                         " export --to="
+                         (symbol-name format)
+                         " "
+                         input-file
+                         " > "
+                         output-file)))
+
+(defmacro pillar-defoutput (format extension)
+  "Define an output FORMAT for Pillar, which use the file extension EXTENSION.
+
+This macro defines an interactive function `pillar-compile-to-FORMAT'."
+  (unless (symbolp format)
+    (error "FORMAT must the a symbol"))
+  (let ((fn-name (intern (concat "pillar-compile-to-" (symbol-name format)))))
+    `(defun ,fn-name ()
+       (interactive)
+       (pillar-compile ',format ',extension))))
+
+(pillar-defoutput latex tex)
+(pillar-defoutput html html)
+(pillar-defoutput markdown md)
+
+(defun pillar-compile-popup ()
+  "Open a popup with compilation options."
+  (interactive)
+  (makey-initialize-key-groups
+   '((pillar-compile
+      (description "Pillar compilation")
+      (actions
+       ("LaTeX"
+        ("l" "Compile to LaTex" pillar-compile-to-latex))
+       ("HTML"
+        ("h" "Compile to HTML" pillar-compile-to-html))
+       ("Markdown"
+        ("m" "Mardown" pillar-compile-to-markdown))))))
+  (makey-key-mode-popup-pillar-compile))
+
+
+;;; Markup insertion
+
 (defun pillar-insert-special-text-markup-popup ()
   "Show a popup with shortcuts."
   (interactive)
@@ -207,6 +269,7 @@ This helps improve font locking for block constructs such as pre blocks."
   (makey-key-mode-popup-special-font))
 
 (define-key pillar-mode-map (kbd "C-c C-f") 'pillar-insert-special-text-markup-popup)
+(define-key pillar-mode-map (kbd "C-c C-c") 'pillar-compile-popup)
 
 (pillar-defformat
  special-text
