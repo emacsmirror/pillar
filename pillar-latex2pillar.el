@@ -154,7 +154,9 @@ will start on a newline."
 (defconst p2l--command0-conversion-table
   '(("ie" "''i.e.'',")
     ("eg" "''e.g.'',")
-    ("etc" "etc.")))
+    ("etc" "etc.")
+    ("noindent" nil)
+    ("pharo" "Pharo")))
 
 (defconst p2l--command1-conversion-table
   '(("chapter" "!" "\n" t)
@@ -164,8 +166,16 @@ will start on a newline."
     ("paragraph" "!!!!!" "\n" t)
     ("chalabel" "@cha:" "\n" t)
     ("seclabel" "@sec:" "\n" t)
+    ("ref" "*" "*")
     ("clsind" "==" "==")
-    ("figref" "*fig:" "*")
+    ("figref" "Figure *fig:" "*")
+    ("charef" "Chapter *cha:" "*")
+    ("secref" "Section *sec:" "*")
+    ("figref" "Figure *fig:" "*")
+    ("Figref" "Figure *fig:" "*")
+    ("appref" "Appendix *app:" "*")
+    ("tabref" "Table *tab:" "*")
+    ("faqref" "FAQ *faq:" "*")
     ("ct" "==" "==")
     ("lct" "==" "==")
     ("emph" "''" "''")
@@ -193,6 +203,7 @@ will start on a newline."
     ("hjo" nil)
     ("ml" nil)
     ("clsindexmain" nil)
+    ("index" nil)
     ("needlines" nil)))
 
 (defconst p2l--command2-conversion-table
