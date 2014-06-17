@@ -45,8 +45,8 @@
   :group 'pillar
   :group 'faces)
 
-(defcustom pillar-executable-path "pillar"
-  "Path to the executable pillar path."
+(defcustom pillar-executable "pillar"
+  "Path to the executable pillar."
   :group 'pillar
   :type 'string)
 
@@ -215,11 +215,10 @@ This helps improve font locking for block constructs such as pre blocks."
                               (symbol-name extension))))
     (pillar-compile-file current-file output-file format)))
 
-;; TODO: use a print to the standard output and use a stream later on.
 (defun pillar-compile-file (input-file output-file format)
   "Compile INPUT-FILE to OUTPUT-FILE in FORMAT.
 Supported formats are `latex', `html' and `markdown'."
-  (shell-command (concat pillar-executable-path
+  (shell-command (concat pillar-executable
                          " export --to="
                          (symbol-name format)
                          " "
