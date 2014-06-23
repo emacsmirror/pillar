@@ -164,11 +164,23 @@ Feature: LaTeX to Pillar
     And I convert the buffer to latex
     Then I should see "==FileStream=="
 
+    When I clear the buffer
+    When I insert "\ind{foobar}"
+    And I convert the buffer to latex
+    Then I should see "foobar"
+    And I should not see "ind"
+
   Scenario: Converting 2-arg commands
     When I clear the buffer
     When I insert "\mthind{FileStream}{binary}"
     And I convert the buffer to latex
     Then I should see "==FileStream>>binary=="
+
+  Scenario: Not converting unknown commands
+    When I clear the buffer
+    When I insert "\ctACommandWithAKnownPrefixButNotExisting{foobar}"
+    And I convert the buffer to latex
+    Then I should see "\ctACommandWithAKnownPrefixButNotExisting{foobar}"
 
   Scenario: Converting a figure
     When I clear the buffer

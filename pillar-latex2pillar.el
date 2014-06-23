@@ -204,7 +204,8 @@ will start on a newline."
     ("ml" nil)
     ("clsindexmain" nil)
     ("index" nil)
-    ("needlines" nil)))
+    ("needlines" nil)
+    ("ind" "" "")))
 
 (defconst p2l--command2-conversion-table
   '(("mthind" "==" ">>" "==")
