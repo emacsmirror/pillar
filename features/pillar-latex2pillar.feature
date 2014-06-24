@@ -170,6 +170,12 @@ Feature: LaTeX to Pillar
     Then I should see "foobar"
     And I should not see "ind"
 
+    When I clear the buffer
+    When I insert "\textbf{selector}"
+    And I convert the buffer to latex
+    Then I should see """selector"""
+    And I should not see "textbf"
+
   Scenario: Converting 2-arg commands
     When I clear the buffer
     When I insert "\mthind{FileStream}{binary}"

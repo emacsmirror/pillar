@@ -180,6 +180,7 @@ will start on a newline."
     ("ct" "==" "==")
     ("lct" "==" "==")
     ("emph" "''" "''")
+    ("textbf" "\"\"" "\"\"")
     ("apl" nil)
     ("ab" nil)
     ("sd" nil)
