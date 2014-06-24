@@ -244,7 +244,7 @@ Does *not* delete newline characters."
 
 (defun p2l-convert-code-once ()
   "Convert the next code block."
-  (let (before-begin after-end file caption label)
+  (let (before-begin after-end)
     (when (re-search-forward "^ *\\\\begin{code}" nil t)
       (setq before-begin (match-beginning 0))
       (re-search-forward (concat "^ *\\\\end{code}"))
