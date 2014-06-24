@@ -182,6 +182,14 @@ Feature: LaTeX to Pillar
     And I convert the buffer to latex
     Then I should see "==FileStream>>binary=="
 
+    When I clear the buffer
+    When I insert "\emphsubind{foo}{bar}"
+    And I convert the buffer to latex
+    Then I should see "''bar''"
+    And I should not see "emph"
+    And I should not see "foo"
+
+
   Scenario: Not converting unknown commands
     When I clear the buffer
     When I insert "\ctACommandWithAKnownPrefixButNotExisting{foobar}"

@@ -58,175 +58,97 @@
      (beginning-of-line)
      (delete-region (point) end))))
 
-(defun p2l--convert-command0-once (latex &optional pillar newline)
-  "Transform the next LATEX 0-arg command to PILLAR.
-LATEX is the name of a 0-argument macro (e.g., \eg).  PILLAR is
-the Pillar markup to replace the macro with.  NEWLINE, if t, will
-make sure the replacement text will start on a newline."
-  (when (re-search-forward
-         ;; make sure we match exactly the desired command, not one
-         ;; with a correct prefix
-         (concat "\\(\\\\" latex "\\)\\([^[:alnum:]]\\|$\\)") nil t)
-    (let ((start (match-beginning 0))
-          end)
-      (replace-match (or pillar "") nil nil nil 1)
-      (setq end (point))
-      (goto-char start)
-      (when (and newline (not (zerop (current-column))))
-        (open-line 1)
-        (setq end (1+ end)))
-      (goto-char end)
-      (when (looking-at "{}")
-        (replace-match ""))
-      t)))
-
-(defun p2l--convert-command0 (latex &optional pillar newline)
-  "Transform all LATEX 0-arg commands to PILLAR.
-LATEX is the name of a 0-argument command (e.g., \eg).  PILLAR is
-the Pillar markup to replace the command with.  NEWLINE, if t, will
-make sure the replacement text will start on a newline."
-  (p2l--setup-buffer)
-  (while (p2l--convert-command0-once latex pillar newline)))
-
-(defun p2l--convert-command1-once (latex &optional pillar-begin pillar-end newline)
-  "Transform the next LATEX 1-arg command.
-LATEX is the name of a 0-argument command (e.g., \eg).
-PILLAR-BEGIN is the Pillar markup to replace the command name with.
-PILLAR-END, if provided, is the Pillar markup that will be
-written after the command's first argument.  NEWLINE, if t, will
-make sure the replacement text will start on a newline."
-  (when (p2l--convert-command0-once latex pillar-begin newline)
-    (if (null pillar-begin)
-        (zap-to-char 1 ?})
-      (let ((start (point))
-            end)
-        (forward-sexp)
-        (delete-char -1)
-        (insert pillar-end)
-        (setq end (point))
-        (goto-char start)
-        (delete-forward-char 1)
-        (goto-char (1- end))))
+(defun p2l--convert-command-once (latex num pillar &optional newline)
+  "Convert next LATEX NUM argument command to PILLAR regex.
+NUM is the arity of the LATEX command.  If NEWLINE is t, make
+sure PILLAR starts its own line."
+  (when
+      (re-search-forward
+       ;; make sure we match exactly the desired command, not one with
+       ;; a correct prefix
+       (concat "\\\\"
+               latex
+               (apply 'concat (make-list num "{\\([^}]*\\)}"))
+               "\\([^[:alnum:]]\\|$\\)") nil t)
+    (replace-match pillar)
+    (when (and newline (not (zerop (current-column))))
+      (open-line 1))
+    (when (looking-at "{}")
+      (replace-match ""))
     t))
 
-(defun p2l--convert-command1 (latex &optional pillar-begin pillar-end newline)
-  "Transform all LATEX 1-arg commands.
-LATEX is the name of a 0-argument command (e.g., \eg).
-PILLAR-BEGIN is the Pillar markup to replace the command name with.
-PILLAR-END, if provided, is the Pillar markup that will be
-written after the command's first argument.  NEWLINE, if t, will
-make sure the replacement text will start on a newline."
+(defun p2l--convert-command (latex num pillar &optional newline)
+  "Convert LATEX NUM argument commands to PILLAR regex.
+NUM is the arity of the LATEX command.  If NEWLINE is t, make
+sure PILLAR starts its own line."
   (p2l--setup-buffer)
-  (while (p2l--convert-command1-once latex pillar-begin pillar-end newline)))
+  (while (p2l--convert-command-once latex num pillar newline)))
 
-(defun p2l--convert-command2-once (latex &optional pillar-begin pillar-middle pillar-end newline)
-  "Transform the next LATEX 2-arg command.
-LATEX is the name of a 0-argument command (e.g., \eg).
-PILLAR-BEGIN is the Pillar markup to replace the command name with.
-PILLAR-MIDDLE, is the Pillar markup that will be written between
-the command's first and second arguments.  PILLAR-END, if provided,
-is the Pillar markup that will be written after the command's second
-argument.  NEWLINE, if t, will make sure the replacement text
-will start on a newline."
-  (when (p2l--convert-command1-once latex pillar-begin pillar-middle newline)
-    (if (null pillar-begin)
-        (zap-to-char 1 ?})
-      (let ((start (point)))
-        (forward-sexp)
-        (delete-char -1)
-        (insert pillar-end)
-        (goto-char start)
-        (delete-forward-char 1)))
-    t))
+(defconst p2l--command-conversion-table
+  '(("ie" 0 "''i.e.'',")
+    ("eg" 0 "''e.g.'',")
+    ("etc" 0 "etc.")
+    ("noindent" 0 "")
+    ("pharo" 0 "Pharo")
+    ("st" 0 "Smalltalk")
+    ("dc" 1 "")
+    ("clsindexmain" 1 "")
+    ("chapter" 1 "!\\1\n" t)
+    ("section" 1 "!!\\1\n" t)
+    ("subsection" 1 "!!!\\1\n" t)
+    ("subsubsection" 1 "!!!!\\1\n" t)
+    ("paragraph" 1 "!!!!!\\1\n" t)
+    ("chalabel" 1 "@cha:\\1\n" t)
+    ("seclabel" 1 "@sec:\\1\n" t)
+    ("ref" 1 "*\\1*")
+    ("clsind" 1 "==\\1==")
+    ("figref" 1 "Figure *fig:\\1*")
+    ("charef" 1 "Chapter *cha:\\1*")
+    ("secref" 1 "Section *sec:\\1*")
+    ("figref" 1 "Figure *fig:\\1*")
+    ("Figref" 1 "Figure *fig:\\1*")
+    ("appref" 1 "Appendix *app:\\1*")
+    ("tabref" 1 "Table *tab:\\1*")
+    ("faqref" 1 "FAQ *faq:\\1*")
+    ("ct" 1 "==\\1==")
+    ("lct" 1 "==\\1==")
+    ("emph" 1 "''\\1''")
+    ("textbf" 1 "\"\"\\1\"\"")
+    ("apl" 1 "")
+    ("ab" 1 "")
+    ("sd" 1 "")
+    ("dc" 1 "")
+    ("md" 1 "")
+    ("on" 1 "")
+    ("damien" 1 "")
+    ("lr" 1 "")
+    ("orla" 1 "")
+    ("alex" 1 "")
+    ("alx" 1 "")
+    ("dr" 1 "")
+    ("ja" 1 "")
+    ("jr" 1 "")
+    ("jb" 1 "")
+    ("fp" 1 "")
+    ("michael" 1 "")
+    ("ew" 1 "")
+    ("mb" 1 "")
+    ("hw" 1 "")
+    ("ben" 1 "")
+    ("hjo" 1 "")
+    ("ml" 1 "")
+    ("clsindexmain" 1 "")
+    ("index" 1 "")
+    ("needlines" 1 "")
+    ("ind" 1 "\\1")
+    ("mthind" 2 "==\\1>>\\2==")
+    ("cmindex" 2 "")
+    ("emphsubind" 2 "''\\2''")))
 
-(defun p2l--convert-command2 (latex &optional pillar-begin pillar-middle pillar-end newline)
-  "Transform all LATEX 2-arg commands.
-LATEX is the name of a 0-argument command (e.g., \eg).
-PILLAR-BEGIN is the Pillar markup to replace the command name with.
-PILLAR-MIDDLE, is the Pillar markup that will be written between
-the command's first and second arguments.  PILLAR-END, if provided,
-is the Pillar markup that will be written after the command's second
-argument.  NEWLINE, if t, will make sure the replacement text
-will start on a newline."
-  (p2l--setup-buffer)
-  (while (p2l--convert-command2-once latex pillar-begin pillar-middle pillar-end newline)))
-
-(defconst p2l--command0-conversion-table
-  '(("ie" "''i.e.'',")
-    ("eg" "''e.g.'',")
-    ("etc" "etc.")
-    ("noindent" nil)
-    ("pharo" "Pharo")
-    ("st" "Smalltalk")))
-
-(defconst p2l--command1-conversion-table
-  '(("chapter" "!" "\n" t)
-    ("section" "!!" "\n" t)
-    ("subsection" "!!!" "\n" t)
-    ("subsubsection" "!!!!" "\n" t)
-    ("paragraph" "!!!!!" "\n" t)
-    ("chalabel" "@cha:" "\n" t)
-    ("seclabel" "@sec:" "\n" t)
-    ("ref" "*" "*")
-    ("clsind" "==" "==")
-    ("figref" "Figure *fig:" "*")
-    ("charef" "Chapter *cha:" "*")
-    ("secref" "Section *sec:" "*")
-    ("figref" "Figure *fig:" "*")
-    ("Figref" "Figure *fig:" "*")
-    ("appref" "Appendix *app:" "*")
-    ("tabref" "Table *tab:" "*")
-    ("faqref" "FAQ *faq:" "*")
-    ("ct" "==" "==")
-    ("lct" "==" "==")
-    ("emph" "''" "''")
-    ("textbf" "\"\"" "\"\"")
-    ("apl" nil)
-    ("ab" nil)
-    ("sd" nil)
-    ("dc" nil)
-    ("md" nil)
-    ("on" nil)
-    ("damien" nil)
-    ("lr" nil)
-    ("orla" nil)
-    ("alex" nil)
-    ("alx" nil)
-    ("dr" nil)
-    ("ja" nil)
-    ("jr" nil)
-    ("jb" nil)
-    ("fp" nil)
-    ("michael" nil)
-    ("ew" nil)
-    ("mb" nil)
-    ("hw" nil)
-    ("ben" nil)
-    ("hjo" nil)
-    ("ml" nil)
-    ("clsindexmain" nil)
-    ("index" nil)
-    ("needlines" nil)
-    ("ind" "" "")))
-
-(defconst p2l--command2-conversion-table
-  '(("mthind" "==" ">>" "==")
-    ("cmindex" nil)))
-
-(defun p2l--interpret-command0-conversion-table ()
-  "Convert all LaTeX 0-arg commands."
-  (dolist (conversion p2l--command0-conversion-table)
-    (apply #'p2l--convert-command0 conversion)))
-
-(defun p2l--interpret-command1-conversion-table ()
-  "Convert all LaTeX 1-arg commands."
-  (dolist (conversion p2l--command1-conversion-table)
-    (apply #'p2l--convert-command1 conversion)))
-
-(defun p2l--interpret-command2-conversion-table ()
-  "Convert all LaTeX 2-arg commands."
-  (dolist (conversion p2l--command2-conversion-table)
-    (apply #'p2l--convert-command2 conversion)))
+(defun p2l--interpret-command-conversion-table ()
+  "Convert all LaTeX commands."
+  (dolist (conversion p2l--command-conversion-table)
+    (apply #'p2l--convert-command conversion)))
 
 (defun p2l--delete-all-spaces ()
   "Remove all spaces around point.
@@ -362,9 +284,7 @@ Does *not* delete newline characters."
   (p2l-remove-latex-comments)
   (p2l-remove-header)
   (p2l-remove-footer)
-  (p2l--interpret-command0-conversion-table)
-  (p2l--interpret-command1-conversion-table)
-  (p2l--interpret-command2-conversion-table)
+  (p2l--interpret-command-conversion-table)
   (p2l-convert-list)
   (p2l-convert-figure)
   (p2l-convert-code)
