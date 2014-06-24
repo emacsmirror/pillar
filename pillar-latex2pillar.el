@@ -156,7 +156,8 @@ will start on a newline."
     ("eg" "''e.g.'',")
     ("etc" "etc.")
     ("noindent" nil)
-    ("pharo" "Pharo")))
+    ("pharo" "Pharo")
+    ("st" "Smalltalk")))
 
 (defconst p2l--command1-conversion-table
   '(("chapter" "!" "\n" t)
