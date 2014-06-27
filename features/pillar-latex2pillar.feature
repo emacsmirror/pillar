@@ -182,6 +182,11 @@ Feature: LaTeX to Pillar
     Then I should see """selector"""
     And I should not see "textbf"
 
+    When I clear the buffer
+    When I insert "\texttt{foo}"
+    And I convert the buffer to latex
+    Then I should see "==foo=="
+
   Scenario: Converting 2-arg commands
     When I clear the buffer
     When I insert "\mthind{FileStream}{binary}"

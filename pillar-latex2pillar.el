@@ -121,6 +121,7 @@ sure PILLAR starts its own line."
     ("lct" 1 "==\\1==")
     ("emph" 1 "''\\1''")
     ("textbf" 1 "\"\"\\1\"\"")
+    ("texttt" 1 "==\\1==")
     ("apl" 1 "")
     ("ab" 1 "")
     ("sd" 1 "")
