@@ -64,11 +64,13 @@ NUM is the arity of the LATEX command.  If NEWLINE is t, make
 sure PILLAR starts its own line."
   (when
       (re-search-forward
-       ;; make sure we match exactly the desired command, not one with
-       ;; a correct prefix
        (concat "\\\\"
                latex
                (apply 'concat (make-list num "{\\([^}]*\\)}"))
+               ;; make sure we match exactly the desired command, not
+               ;; one with a correct prefix. A better solution would
+               ;; be to just use \> but that would require creating a
+               ;; syntax table with `modify-syntax-entry'.
                "\\([^[:alnum:]]\\|$\\)") nil t)
     (let* ((last-subexpr (1+ num))
            (begin-match (match-beginning 0))
