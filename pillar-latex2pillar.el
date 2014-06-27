@@ -59,7 +59,7 @@
      (delete-region (point) end))))
 
 (defun p2l--convert-command-once (latex num pillar &optional newline)
-  "Convert next LATEX NUM argument command to PILLAR regex.
+  "Convert next LATEX NUM argument command to PILLAR regexp.
 NUM is the arity of the LATEX command.  If NEWLINE is t, make
 sure PILLAR starts its own line."
   (when
@@ -70,11 +70,17 @@ sure PILLAR starts its own line."
                latex
                (apply 'concat (make-list num "{\\([^}]*\\)}"))
                "\\([^[:alnum:]]\\|$\\)") nil t)
-    (replace-match pillar)
-    (when (and newline (not (zerop (current-column))))
-      (open-line 1))
-    (when (looking-at "{}")
-      (replace-match ""))
+    (let* ((last-subexpr (1+ num))
+           (begin-match (match-beginning 0))
+           (undesired-match (- (match-end last-subexpr)
+                               (match-beginning last-subexpr))))
+      (replace-match (format "%s\\%s" pillar last-subexpr))
+      (backward-char undesired-match)
+      (when (looking-at "{}")
+        (replace-match ""))
+      (goto-char begin-match)
+      (when (and newline (not (zerop (current-column))))
+        (open-line 1)))
     t))
 
 (defun p2l--convert-command (latex num pillar &optional newline)

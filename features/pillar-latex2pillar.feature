@@ -235,3 +235,18 @@ Feature: LaTeX to Pillar
 
     Given I convert the buffer to latex
     Then I should see "''foo'' ''bar''"
+
+  Scenario: Handling space
+    When I clear the buffer
+    And I insert "\ind{block} closure"
+
+    Given I convert the buffer to latex
+    Then I should see "block closure"
+
+    When I clear the buffer
+    And I insert "\ind{block}."
+
+    Given I convert the buffer to latex
+    Then I should see "block."
+
+  
