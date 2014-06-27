@@ -104,6 +104,7 @@ sure PILLAR starts its own line."
     ("subsection" 1 "!!!\\1\n" t)
     ("subsubsection" 1 "!!!!\\1\n" t)
     ("paragraph" 1 "!!!!!\\1\n" t)
+    ("important" 1 "@@important \\1" t)
     ("chalabel" 1 "@cha:\\1\n" t)
     ("seclabel" 1 "@sec:\\1\n" t)
     ("ref" 1 "*\\1*")

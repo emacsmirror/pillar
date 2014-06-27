@@ -249,4 +249,9 @@ Feature: LaTeX to Pillar
     Given I convert the buffer to latex
     Then I should see "block."
 
-  
+  Scenario: Converting \important boxes
+    When I clear the buffer
+    And I insert "\important{Expression Msg1 ; Msg2}"
+
+    Given I convert the buffer to latex
+    Then I should see "@@important Expression Msg1 ; Msg2"
