@@ -171,6 +171,12 @@ Feature: LaTeX to Pillar
     And I should not see "ind"
 
     When I clear the buffer
+    When I insert "\emphind{cascade}"
+    And I convert the buffer to latex
+    Then I should see "''cascade''"
+    And I should not see "ind"
+
+    When I clear the buffer
     When I insert "\textbf{selector}"
     And I convert the buffer to latex
     Then I should see """selector"""
