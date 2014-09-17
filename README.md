@@ -8,11 +8,7 @@ Major mode for editing Pillar files
 
 ## Installing
 
-You will need `make` and [Cask](https://github.com/cask/cask) to
-build the project.
-
-    cd pillar
-    make && make install
+Pillar is on [MELPA](http://melpa.milkbox.net).
 
 ## Contributing
 
