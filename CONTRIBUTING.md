@@ -4,6 +4,14 @@ Contributions are welcome. If you discover bugs or issues, or have ideas for
 improvements or new features, please file a report on the issue tracker for this
 repository. Follow the guidelines below to make sure everything goes smoothly.
 
+## Installing
+
+You need `make` and [Cask](https://github.com/cask/cask) to
+build the project.
+
+    cd pillar
+    make && make install
+
 ## Issue reporting
 
 - Check that the issue has not already been reported
