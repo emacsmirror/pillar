@@ -191,7 +191,7 @@ Feature: LaTeX to Pillar
     When I clear the buffer
     When I insert "\mthind{FileStream}{binary}"
     And I convert the buffer to latex
-    Then I should see "==FileStream>>binary=="
+    Then I should see "==binary=="
 
     When I clear the buffer
     When I insert "\emphsubind{foo}{bar}"
@@ -266,3 +266,21 @@ Feature: LaTeX to Pillar
 
     Given I convert the buffer to latex
     Then I should see "@@important Expression Msg1 ; Msg2"
+
+  Scenario: Convertion of spaces and dashes
+    When I clear the buffer
+    And I insert "foo\,---\,bar"
+    Given I convert the buffer to latex
+    Then I should see "foo — bar"
+
+  Scenario: Convertion of annotated paragraphs
+    When I clear the buffer
+    And I insert "\dothis{foo bar}"
+    Given I convert the buffer to latex
+    Then I should see "@@todo foo bar"
+
+  Scenario: Convertion of complex stuff
+    When I clear the buffer
+    And I insert "\important{If you send a \ind{cascade} of messages to a brush including the message \mthind{WABrush}{with:}, then \ct{with:} should be the \emph{final} message."
+    Given I convert the buffer to latex
+    Then I should see "@@important If you send a cascade of messages to a brush including the message ==with:==, then ==with:== should be the ''final'' message."

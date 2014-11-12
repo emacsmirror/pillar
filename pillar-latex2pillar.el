@@ -92,6 +92,13 @@ sure PILLAR starts its own line."
   (p2l--setup-buffer)
   (while (p2l--convert-command-once latex num pillar newline)))
 
+(defun p2l--convert-regex (latex pillar &optional newline)
+  "Convert LATEX regex to PILLAR regex.
+If NEWLINE is t, make sure PILLAR starts its own line."
+  (p2l--setup-buffer)
+  (while (re-search-forward latex nil t)
+    (replace-match pillar)))
+
 (defconst p2l--command-conversion-table
   '(("ie" 0 "''i.e.'',")
     ("eg" 0 "''e.g.'',")
@@ -100,6 +107,9 @@ sure PILLAR starts its own line."
     ("pharo" 0 "Pharo")
     ("st" 0 "Smalltalk")
     ("dc" 1 "")
+    ("mbox" 1 "\\1")
+    ("url" 1 "*\\1*")
+    ("needspace" 1 "")
     ("chapter" 1 "!\\1\n" t)
     ("section" 1 "!!\\1\n" t)
     ("subsection" 1 "!!!\\1\n" t)
@@ -110,6 +120,11 @@ sure PILLAR starts its own line."
     ("seclabel" 1 "@sec:\\1\n" t)
     ("ref" 1 "*\\1*")
     ("figref" 1 "Figure *fig:\\1*")
+    ("mthref" 1 "method *mth:\\1*")
+    ("mthsref" 1 "methods *mth:\\1*")
+    ("Mthref" 1 "Method *mth:\\1*")
+    ("tmthref" 1 "the method *mth:\\1*")
+    ("Tmthref" 1 "The method *mth:\\1*")
     ("charef" 1 "Chapter *cha:\\1*")
     ("secref" 1 "Section *sec:\\1*")
     ("figref" 1 "Figure *fig:\\1*")
@@ -117,11 +132,14 @@ sure PILLAR starts its own line."
     ("appref" 1 "Appendix *app:\\1*")
     ("tabref" 1 "Table *tab:\\1*")
     ("faqref" 1 "FAQ *faq:\\1*")
+    ("button" 1 "==\\1==")
     ("ct" 1 "==\\1==")
     ("lct" 1 "==\\1==")
     ("emph" 1 "''\\1''")
     ("textbf" 1 "\"\"\\1\"\"")
     ("texttt" 1 "==\\1==")
+    ("link" 1 "__\\1__")
+    ("go" 0 "▹")
     ("apl" 1 "")
     ("ab" 1 "")
     ("sd" 1 "")
@@ -149,7 +167,7 @@ sure PILLAR starts its own line."
 
     ("clsind" 1 "==\\1==")
     ("ind" 1 "\\1")
-    ("mthind" 2 "==\\1>>\\2==")
+    ("mthind" 2 "==\\2==")
     ("emphsubind" 2 "''\\2''")
 
     ("toolsflap" 0 "''Tools'' flap")
@@ -184,7 +202,7 @@ sure PILLAR starts its own line."
     ("subindmain" 2 "\\2")
     ("clsindmain" 1 "==\\1==")
 
-    ; All these commands only populate the index and can be discarded
+    ;; All these commands only populate the index and can be discarded
     ("index" 1 "")
     ("clsindex" 1 "")
     ("mthindex" 2 "")
@@ -199,12 +217,27 @@ sure PILLAR starts its own line."
     ("clsindexmain" 1 "")
     ("indexmain" 1 "")
     ("clsindexmain" 1 "")
+
+    ("footnote" 1 "(\\1)")
+    ("dothis" 1 "@@todo \\1")
+
+    ))
+
+(defconst p2l--regex-conversion-table
+  '(("---" "—")
+    ("--" "–")
+    ("\\\\," " ")
     ))
 
 (defun p2l--interpret-command-conversion-table ()
   "Convert all LaTeX commands."
   (dolist (conversion p2l--command-conversion-table)
     (apply #'p2l--convert-command conversion)))
+
+(defun p2l--interpret-regex-conversion-table ()
+  "Convert all LaTeX regular expressions."
+  (dolist (conversion p2l--regex-conversion-table)
+    (apply #'p2l--convert-regex conversion)))
 
 (defun p2l--delete-all-spaces ()
   "Remove all spaces around point.
@@ -313,7 +346,7 @@ Does *not* delete newline characters."
           (insert "[[[")
           (goto-char (point-max))
           (beginning-of-line)
-          (kill-line)
+          (delete-region (point) (point-at-eol))
           (insert "]]]")
           t)))))
 
@@ -344,7 +377,8 @@ Does *not* delete newline characters."
   (p2l-convert-list)
   (p2l-convert-figure)
   (p2l-convert-code)
-  (p2l-convert-double-quotes))
+  (p2l-convert-double-quotes)
+  (p2l--interpret-regex-conversion-table))
 
 (provide 'pillar-latex2pillar)
 
