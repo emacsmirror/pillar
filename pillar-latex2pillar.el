@@ -106,6 +106,15 @@ If NEWLINE is t, make sure PILLAR starts its own line."
     ("noindent" 0 "")
     ("pharo" 0 "Pharo")
     ("st" 0 "Smalltalk")
+    ("super" 0 "==super==")
+    ("self" 0 "==self==")
+    ("nil" 0 "==nil==")
+    ("click" 0 "click")
+    ("actclick" 0 "action-click")
+    ("metaclick" 0 "meta-click")
+    ("Click" 0 "Click")
+    ("Actclick" 0 "Action-click")
+    ("Metaclick" 0 "Meta-click")
     ("dc" 1 "")
     ("mbox" 1 "\\1")
     ("url" 1 "*\\1*")
@@ -135,7 +144,10 @@ If NEWLINE is t, make sure PILLAR starts its own line."
     ("button" 1 "==\\1==")
     ("ct" 1 "==\\1==")
     ("lct" 1 "==\\1==")
+    ("menu" 1 "==\\1==")
+    ("short" 1 "==\\1==")
     ("emph" 1 "''\\1''")
+    ("underline" 1 "__\\1__")
     ("textbf" 1 "\"\"\\1\"\"")
     ("texttt" 1 "==\\1==")
     ("link" 1 "__\\1__")
@@ -176,6 +188,8 @@ If NEWLINE is t, make sure PILLAR starts its own line."
     ("scat" 1 "==\\1==")
     ("pkg" 1 "==\\1==")
     ("prot" 1 "==\\1==")
+
+    ("cite" 1 "")
 
     ;; All these commands populate the index and display (part of)
     ;; their arguments
@@ -225,8 +239,11 @@ If NEWLINE is t, make sure PILLAR starts its own line."
 
 (defconst p2l--regex-conversion-table
   '(("---" "—")
-    ("--" "–")
+    ;; ("--" "–") don't convert en-dash because it is used by scripts
+    ;; to indicate return values (-->)
     ("\\\\," " ")
+    ("\\\\ct!\\([^!]*\\)!" "==\\1==")
+    ("\\\\#" "#")
     ))
 
 (defun p2l--interpret-command-conversion-table ()
@@ -306,11 +323,11 @@ Does *not* delete newline characters."
         (save-restriction
           (narrow-to-region before-begin after-end)
           (goto-char (point-min))
-          (kill-line)
+          (delete-region (point) (point-at-eol))
           (delete-blank-lines)
           (goto-char (point-max))
           (beginning-of-line)
-          (kill-line)
+          (delete-region (point) (point-at-eol))
           (delete-blank-lines)
           (goto-char (point-min))
           (when
@@ -318,7 +335,8 @@ Does *not* delete newline characters."
             (setq file (match-string 1))
             (goto-char (point-min))
             (when (re-search-forward "\\\\caption{\\([^}]*\\)}" nil t)
-              (setq caption (match-string 1))
+              (setq caption (replace-regexp-in-string "\\\\figlabel{[^}]*}?" "" (match-string 1)))
+              (goto-char (point-min))
               (when (re-search-forward "\\\\figlabel{\\([^}]*\\)}" nil t)
                 (setq label (match-string 1))
                 (delete-region (point-min) (point-max))
