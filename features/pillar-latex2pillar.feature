@@ -278,9 +278,3 @@ Feature: LaTeX to Pillar
     And I insert "\dothis{foo bar}"
     Given I convert the buffer to latex
     Then I should see "@@todo foo bar"
-
-  Scenario: Convertion of complex stuff
-    When I clear the buffer
-    And I insert "\important{If you send a \ind{cascade} of messages to a brush including the message \mthind{WABrush}{with:}, then \ct{with:} should be the \emph{final} message."
-    Given I convert the buffer to latex
-    Then I should see "@@important If you send a cascade of messages to a brush including the message ==with:==, then ==with:== should be the ''final'' message."
